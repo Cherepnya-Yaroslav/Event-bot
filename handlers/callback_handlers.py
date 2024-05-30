@@ -4,6 +4,12 @@ import sqlite3
 from config.settings import DB_PATH, ADMIN_USER_ID
 import datetime
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
+import sqlite3
+from config.settings import DB_PATH, ADMIN_USER_ID
+import datetime
+
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -85,10 +91,10 @@ async def search_events_by_week(update, context):
             reply_markup = InlineKeyboardMarkup(keyboard)
             if image_path:
                 await update.callback_query.message.reply_photo(photo=image_path,
-                                                                caption=f"{date}\n{title}\n{description}",
+                                                                caption=f"{title}\n{description}\n{date}",
                                                                 reply_markup=reply_markup)
             else:
-                await update.callback_query.message.reply_text(f"{date}\n{title}\n{description}",
+                await update.callback_query.message.reply_text(f"{title}\n{description}\n{date}",
                                                                reply_markup=reply_markup)
     else:
         await update.callback_query.message.reply_text("Нет мероприятий на ближайшую неделю.")
@@ -154,10 +160,10 @@ async def show_favorites(query, context):
             reply_markup = InlineKeyboardMarkup(keyboard)
             if image_path:
                 await query.message.reply_photo(photo=image_path,
-                                                caption=f"Дата: {date}\nНазвание: {title}\nОписание: {description}",
+                                                caption=f" {title}\n {description}\n {date}",
                                                 reply_markup=reply_markup)
             else:
-                await query.message.reply_text(f"Дата: {date}\nНазвание: {title}\nОписание: {description}",
+                await query.message.reply_text(f" {title}\n {description}\n {date} ",
                                                reply_markup=reply_markup)
     else:
         await query.message.reply_text("У вас нет избранных событий.")

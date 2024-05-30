@@ -11,17 +11,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         date = update.message.text
         if not validate_date(date):
             await update.message.reply_text(
-                'Дата не может быть в прошлом. Введите корректную дату в формате ГГГГ-ММ-ДД:')
+                'Введите корректную дату в формате ГГГГ-ММ-ДД:')
             return
         context.user_data['search_date'] = date
-        await search_events_by_date(update.callback_query, context)
+        await search_events_by_date(update, context)
         context.user_data['state'] = None
 
     elif state == 'my_event_date':
         date = update.message.text
         if not validate_date(date):
             await update.message.reply_text(
-                'Дата не может быть в прошлом. Введите корректную дату в формате ГГГГ-ММ-ДД:')
+                'Введите корректную дату в формате ГГГГ-ММ-ДД:')
             return
         context.user_data['my_event_date'] = date
         await update.message.reply_text('Введите название вашего мероприятия:')
@@ -30,13 +30,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif state == 'my_event_title':
         title = update.message.text
         context.user_data['my_event_title'] = title
-        await update.message.reply_text('Введите описание вашего мероприятия:')
+        await update.message.reply_text('Введите описание вашего мероприятия. Обратите внимание, что следует добавить всю важную информацию, как сыллка на вашу соцсеть и место проведения. :')
         context.user_data['state'] = 'my_event_description'
 
     elif state == 'my_event_description':
         description = update.message.text
         context.user_data['my_event_description'] = description
-        await update.message.reply_text('Отправьте изображение для вашего мероприятия или введите "нет":')
+        await update.message.reply_text('Отправьте изображение для вашего мероприятия')
         context.user_data['state'] = 'my_event_image'
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
