@@ -19,6 +19,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await search_events_by_date(update, context)
         context.user_data['state'] = None
 
+
     elif state == 'my_event_date':
         date = update.message.text
         if not validate_date(date):

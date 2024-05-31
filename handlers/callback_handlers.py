@@ -56,17 +56,27 @@ async def search_events_by_date(update, context):
     cursor.execute('SELECT id, title, description, image_path FROM events WHERE date = ?', (date,))
     events = cursor.fetchall()
     conn.close()
+
     if events:
         for event_id, title, description, image_path in events:
             keyboard = [[InlineKeyboardButton("Добавить в избранное", callback_data=f'add_favorite_{event_id}')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             if image_path:
-                await update.callback_query.message.reply_photo(photo=image_path, caption=f"<b>{title}</b>\n\n{description}",
-                                                                reply_markup=reply_markup, parse_mode=ParseMode.HTML)
+                if update.callback_query:
+                    await update.callback_query.message.reply_photo(photo=image_path, caption=f"{title}\n{description}", reply_markup=reply_markup)
+                else:
+                    await update.message.reply_photo(photo=image_path, caption=f"{title}\n{description}", reply_markup=reply_markup)
             else:
-                await update.callback_query.message.reply_text(f"<b>{title}</b>\n\n{description}", reply_markup=reply_markup, parse_mode=ParseMode.HTML)
+                if update.callback_query:
+                    await update.callback_query.message.reply_text(f"{title}\n{description}", reply_markup=reply_markup)
+                else:
+                    await update.message.reply_text(f"{title}\n{description}", reply_markup=reply_markup)
     else:
-        await update.callback_query.message.reply_text("Нет мероприятий на выбранную дату.")
+        if update.callback_query:
+            await update.callback_query.message.reply_text("Нет мероприятий на выбранную дату.")
+        else:
+            await update.message.reply_text("Нет мероприятий на выбранную дату.")
+
 
 
 async def search_events_by_week(update, context):
