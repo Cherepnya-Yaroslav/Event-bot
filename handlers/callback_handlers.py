@@ -30,7 +30,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text('Выберите дату поиска:', reply_markup=reply_markup)
-    elif query.data.startswith('search_date_'):
+    elif query.data.startswith('search_date_') and query.data != "search_date_input":
         context.user_data['search_date'] = query.data.split('_')[2]
         await search_events_by_date(update, context)
     elif query.data == 'search_date_input':
