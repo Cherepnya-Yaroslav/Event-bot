@@ -78,3 +78,41 @@ async def show_suggestions_status(update: Update, context: ContextTypes.DEFAULT_
     else:
         message = "У вас нет заявок."
     await update.message.reply_text(message)
+
+
+async def clear_all_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.from_user.id != ADMIN_USER_ID:
+        await update.message.reply_text("У вас нет прав для выполнения этой команды.")
+        return
+
+    if 'clear_all_date' not in context.user_data:
+        await update.message.reply_text("Пожалуйста, укажите дату в формате ГГГГ-ММ-ДД.")
+        context.user_data['state'] = 'clear_all_date'
+        return
+
+    date = context.user_data['clear_all_date']
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM suggestions WHERE date <= ?', (date,))
+        cursor.execute('DELETE FROM events WHERE date <= ?', (date,))
+        cursor.execute('DELETE FROM favorites WHERE event_id IN (SELECT id FROM events WHERE date <= ?)', (date,))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"Все записи из баз данных до {date} включительно были удалены.")
+        del context.user_data['clear_all_date']
+    except Exception as e:
+        await update.message.reply_text(f"Произошла ошибка: {e}")
+
+
+async def handle_clear_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    state = context.user_data.get('state')
+    date = update.message.text
+
+    if state == 'clear_all_date':
+        context.user_data['clear_all_date'] = date
+        await clear_all_data(update, context)
+    else:
+        await update.message.reply_text("Неизвестное состояние. Попробуйте снова.")
+
+    context.user_data['state'] = None
