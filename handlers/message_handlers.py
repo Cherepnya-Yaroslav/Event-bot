@@ -13,7 +13,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         date = update.message.text
         if not validate_date(date):
             await update.message.reply_text(
-                'Дата не может быть в прошлом. Введите корректную дату в формате ГГГГ-ММ-ДД:')
+                'Введите корректную дату в формате ГГГГ-ММ-ДД:')
             return
         context.user_data['search_date'] = date
         await search_events_by_date(update, context)
@@ -23,7 +23,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         date = update.message.text
         if not validate_date(date):
             await update.message.reply_text(
-                'Дата не может быть в прошлом. Введите корректную дату в формате ГГГГ-ММ-ДД:')
+                'Введите корректную дату в формате ГГГГ-ММ-ДД:')
             return
         context.user_data['my_event_date'] = date
         await update.message.reply_text('Введите название вашего мероприятия:')
@@ -32,13 +32,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif state == 'my_event_title':
         title = update.message.text
         context.user_data['my_event_title'] = title
-        await update.message.reply_text('Введите описание вашего мероприятия:')
+        await update.message.reply_text('Введите описание вашего мероприятия. Обратите внимание, что стоит добавить место проведения события, время и цену в ваш текст афиши:')
         context.user_data['state'] = 'my_event_description'
 
     elif state == 'my_event_description':
         description = update.message.text
         context.user_data['my_event_description'] = description
-        await update.message.reply_text('Отправьте изображение для вашего мероприятия или введите "нет":')
+        await update.message.reply_text('Отправьте изображение для вашего мероприятия.:')
         context.user_data['state'] = 'my_event_image'
 
     elif state == 'my_event_image':
@@ -56,7 +56,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await update.message.reply_text('Ваше мероприятие предложено администратору на рассмотрение.')
             context.user_data['state'] = None
         else:
-            await update.message.reply_text('Пожалуйста, отправьте изображение или введите "нет".')
+            await update.message.reply_text('Пожалуйста, отправьте изображение.')
 
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
