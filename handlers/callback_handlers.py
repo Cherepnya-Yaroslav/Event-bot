@@ -4,12 +4,6 @@ import sqlite3
 from config.settings import DB_PATH, ADMIN_USER_ID
 import datetime
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
-import sqlite3
-from config.settings import DB_PATH, ADMIN_USER_ID
-import datetime
-
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query

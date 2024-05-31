@@ -5,17 +5,26 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.message.from_user
+    welcome_message = (
+        f"Привет, {user.first_name}! 👋\n\n"
+        "Добро пожаловать в нашего бота для управления событиями! "
+        "Вот что вы можете сделать:\n\n"
+        "1. Просматривать и добавлять события в избранное.\n"
+        "2. Искать события по дате.\n"
+        "3. Предлагать свои мероприятия на рассмотрение.\n\n"
+        "Используйте команду /menu для вызова главного меню."
+    )
+    await update.message.reply_text(welcome_message)
+
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Избранное", callback_data='favorites')],
         [InlineKeyboardButton("Поиск событий", callback_data='search')],
-        [InlineKeyboardButton("Мои события", callback_data='my_events')]
+        [InlineKeyboardButton("Предложить событие", callback_data='my_events')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Выберите опцию:', reply_markup=reply_markup)
-
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await start(update, context)
-
 
 
 async def moderate_suggestions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
