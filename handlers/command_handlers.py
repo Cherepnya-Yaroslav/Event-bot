@@ -1,8 +1,18 @@
+import datetime
+
 from config.settings import DB_PATH
 from config.settings import ADMIN_USER_ID
 import sqlite3
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+
+def validate_date(date_text):
+    try:
+        date = datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        return date
+    except ValueError:
+        return None
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.message.from_user
@@ -28,9 +38,6 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def moderate_suggestions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
-
-
     user_id = update.message.from_user.id
     if user_id != ADMIN_USER_ID:
         await update.message.reply_text("У вас нет прав для выполнения этой команды.")
@@ -84,35 +91,26 @@ async def clear_all_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if update.message.from_user.id != ADMIN_USER_ID:
         await update.message.reply_text("У вас нет прав для выполнения этой команды.")
         return
-
-    if 'clear_all_date' not in context.user_data:
-        await update.message.reply_text("Пожалуйста, укажите дату в формате ГГГГ-ММ-ДД.")
-        context.user_data['state'] = 'clear_all_date'
+    print(context.args)
+    if len(context.args) == 0:
+        await update.message.reply_text("Пожалуйста, укажите дату в формате ГГГГ-ММ-ДД в одной строке с командой.")
         return
 
-    date = context.user_data['clear_all_date']
+    date_str = context.args[0]
+    date = validate_date(date_str)
+    print(date_str, date)
+    if not date:
+        await update.message.reply_text("Некорректный формат даты. Пожалуйста, введите дату в формате ГГГГ-ММ-ДД.")
+        return
+
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM suggestions WHERE date <= ?', (date,))
-        cursor.execute('DELETE FROM events WHERE date <= ?', (date,))
-        cursor.execute('DELETE FROM favorites WHERE event_id IN (SELECT id FROM events WHERE date <= ?)', (date,))
+        cursor.execute('DELETE FROM suggestions WHERE date <= ?', (date_str,))
+        cursor.execute('DELETE FROM events WHERE date <= ?', (date_str,))
+        cursor.execute('DELETE FROM favorites WHERE event_id IN (SELECT id FROM events WHERE date <= ?)', (date_str,))
         conn.commit()
         conn.close()
-        await update.message.reply_text(f"Все записи из баз данных до {date} включительно были удалены.")
-        del context.user_data['clear_all_date']
+        await update.message.reply_text(f"Все записи из баз данных до {date_str} включительно были удалены.")
     except Exception as e:
         await update.message.reply_text(f"Произошла ошибка: {e}")
-
-
-async def handle_clear_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    state = context.user_data.get('state')
-    date = update.message.text
-
-    if state == 'clear_all_date':
-        context.user_data['clear_all_date'] = date
-        await clear_all_data(update, context)
-    else:
-        await update.message.reply_text("Неизвестное состояние. Попробуйте снова.")
-
-    context.user_data['state'] = None
